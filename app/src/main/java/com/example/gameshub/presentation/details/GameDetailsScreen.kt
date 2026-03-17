@@ -1,10 +1,10 @@
 package com.example.gameshub.presentation.details
 
-import android.view.ViewGroup
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,12 +22,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,16 +34,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
 import com.example.gameshub.presentation.details.components.YouTubePlayer
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+import com.example.gameshub.presentation.games.components.RatingBadge
+import com.example.gameshub.presentation.games.components.SectionTitle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,29 +50,7 @@ fun GameDetailsScreen(
     onBackClick: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
-    val topBarTitle = when (val uiState = state.uiState) {
-        GameDetailsUiState.Loading -> "Loading…"
-        is GameDetailsUiState.Error -> "Game"
-        is GameDetailsUiState.Success -> uiState.details.name
-    }
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = topBarTitle,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
+    Scaffold { paddingValues ->
         when (val uiState = state.uiState) {
             GameDetailsUiState.Loading -> {
                 Column(
@@ -125,6 +98,23 @@ fun GameDetailsScreen(
                         .verticalScroll(rememberScrollState())
                         .padding(16.dp)
                 ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clickable(onClick = onBackClick)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Back to list",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
                     Card(
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -141,22 +131,28 @@ fun GameDetailsScreen(
                     Spacer(modifier = Modifier.height(14.dp))
                     Text(
                         text = details.name,
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Released: ${details.released ?: "Unknown"} • Rating: ${"%.1f".format(details.rating)}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "Released · ${details.released ?: "Unknown"}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        RatingBadge(rating = details.rating)
+                    }
                     if (selectedTrailerIdState.value != null) {
                         Spacer(modifier = Modifier.height(14.dp))
-                        Text(
-                            text = "Trailer",
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                        SectionTitle(text = "Trailer")
                         Spacer(modifier = Modifier.height(8.dp))
                         Box(
                             modifier = Modifier
@@ -165,7 +161,7 @@ fun GameDetailsScreen(
                         ) {
                             YouTubePlayer(
                                 videoId = selectedTrailerIdState.value,
-                                modifier = Modifier
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
 
@@ -173,10 +169,7 @@ fun GameDetailsScreen(
                     }
                     if (details.screenshotImageUrls.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(14.dp))
-                        Text(
-                            text = "Screenshots",
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                        SectionTitle(text = "Screenshots")
                         Spacer(modifier = Modifier.height(8.dp))
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             items(count = details.screenshotImageUrls.size) { index ->
@@ -217,15 +210,18 @@ fun GameDetailsScreen(
                         }
                     }
                     Spacer(modifier = Modifier.height(14.dp))
-                    Text(
-                        text = "Description",
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    SectionTitle(text = "Description")
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = details.description.ifBlank { "No description available." },
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+                    Card(
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    ) {
+                        Text(
+                            text = details.description.ifBlank { "No description available." },
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
                 }
             }
         }
