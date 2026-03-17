@@ -1,3 +1,45 @@
 <resources>
     <string name="app_name">GamesHub</string>
+
+    <!-- Common actions -->
+    <string name="action_retry">Retry</string>
+    <string name="action_clear_search">Clear search</string>
+
+    <!-- Splash / app -->
+    <string name="content_description_app_logo">GamesHub logo</string>
+
+    <!-- Games list -->
+    <string name="games_list_title">GamesHub</string>
+    <string name="games_list_subtitle">Discover and track amazing games</string>
+    <string name="games_list_search_placeholder">Search loaded games...</string>
+    <string name="games_list_toggle_to_list">Switch to list view</string>
+    <string name="games_list_toggle_to_grid">Switch to grid view</string>
+    <string name="games_list_showing_count">Showing %1$d</string>
+    <string name="games_list_empty_generic">No games found.</string>
+    <string name="games_list_empty_query">No results for \"%1$s\"</string>
+
+    <!-- Empty / error states -->
+    <string name="empty_state_title">Nothing to show</string>
+    <string name="error_state_title">Something went wrong</string>
+
+    <!-- Genres -->
+    <string name="genre_all">All</string>
+
+    <!-- Game details -->
+    <string name="details_title_fallback">Game</string>
+    <string name="details_title_loading">Loading...</string>
+    <string name="details_back">Back</string>
+    <string name="details_failed_to_load">Failed to load details</string>
+    <string name="details_released_with_date">Released \u00b7 %1$s</string>
+    <string name="details_released_unknown">Unknown</string>
+    <string name="details_trailer_section">Trailer</string>
+    <string name="details_trailer_not_available">Trailer not available</string>
+    <string name="details_screenshots_section">Screenshots</string>
+    <string name="details_description_section">Description</string>
+    <string name="details_description_empty">No description available.</string>
+
+    <!-- Domain error messages shown to user -->
+    <string name="error_network">Network error. Check your connection and try again.</string>
+    <string name="error_server">Server error (%1$d). Please try again.</string>
+    <string name="error_unexpected">Unexpected error. Please try again.</string>
 </resources>

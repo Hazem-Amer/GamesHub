@@ -29,61 +29,100 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.gameshub.domain.model.Game
 
+enum class GameCardVariant {
+    List,
+    Grid
+}
+
 @Composable
 fun GameCard(
     game: Game,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    variant: GameCardVariant = GameCardVariant.List
 ) {
     val context = LocalContext.current
     Card(
         modifier = modifier
             .fillMaxWidth()
+            .clip(shape = RoundedCornerShape(24.dp))
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(game.backgroundImageUrl)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = null,
-                modifier = Modifier
-                    .width(72.dp)
-                    .height(72.dp)
-                    .clip(RoundedCornerShape(18.dp)),
-                contentScale = ContentScale.Crop
-            )
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Text(
-                    text = game.name,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.size(6.dp))
-                Text(
-                    text = "Action • 2024", // placeholder meta; domain lacks platform/genre
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+        when (variant) {
+            GameCardVariant.List -> {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(game.backgroundImageUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .width(72.dp)
+                            .height(72.dp)
+                            .clip(RoundedCornerShape(18.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        Text(
+                            text = game.name,
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(modifier = Modifier.size(6.dp))
+                        Text(
+                            text = "Action • 2024",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Box(
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ) {
+                        RatingBadge(rating = game.rating)
+                    }
+                }
             }
-            Box(
-                modifier = Modifier.align(Alignment.CenterVertically)
-            ) {
-                RatingBadge(rating = game.rating)
+            GameCardVariant.Grid -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(game.backgroundImageUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(140.dp)
+                            .clip(RoundedCornerShape(16.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                    Text(
+                        text = game.name,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    RatingBadge(rating = game.rating)
+                }
             }
         }
     }
