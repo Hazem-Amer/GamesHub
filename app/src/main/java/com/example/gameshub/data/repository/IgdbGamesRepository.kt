@@ -67,6 +67,7 @@ class IgdbGamesRepository @Inject constructor(
             } catch (err: Exception) {
                 // fall through to cache
             }
+
         }
         val cachedEntity = gameDetailsDao.getGameDetailsById(id)
         if (cachedEntity != null) {
@@ -88,6 +89,7 @@ class IgdbGamesRepository @Inject constructor(
             } catch (err: Exception) {
                 // fall through to cache
             }
+
         }
         val cachedEntities = genresDao.getAllGenres()
         if (cachedEntities.isNotEmpty()) {

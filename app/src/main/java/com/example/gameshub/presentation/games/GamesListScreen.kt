@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GridView
@@ -62,6 +63,7 @@ fun GamesListScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val listState = rememberLazyListState()
+    val gridState = rememberLazyGridState()
     val snackbarHostState = remember { SnackbarHostState() }
     val isGridModeState = rememberSaveable { mutableStateOf(false) }
     val isGridMode = isGridModeState.value
@@ -78,17 +80,33 @@ fun GamesListScreen(
             viewModel.executeLoadNextPage()
         }
     }
-    LaunchedEffect(listState, state.visibleGames.size) {
-        snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
-            .filter { it != null }
-            .map { it ?: 0 }
-            .distinctUntilChanged()
-            .collect { lastVisibleIndex ->
-                val shouldLoadNextPage = lastVisibleIndex >= (state.visibleGames.size - 5)
-                if (shouldLoadNextPage) {
-                    viewModel.executeLoadNextPage()
+    LaunchedEffect(listState, state.visibleGames.size, isGridMode) {
+        if (!isGridMode) {
+            snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+                .filter { index -> index != null }
+                .map { index -> index ?: 0 }
+                .distinctUntilChanged()
+                .collect { lastVisibleIndex ->
+                    val shouldLoadNextPage = lastVisibleIndex >= (state.visibleGames.size - 5)
+                    if (shouldLoadNextPage) {
+                        viewModel.executeLoadNextPage()
+                    }
                 }
-            }
+        }
+    }
+    LaunchedEffect(gridState, state.visibleGames.size, isGridMode) {
+        if (isGridMode) {
+            snapshotFlow { gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+                .filter { index -> index != null }
+                .map { index -> index ?: 0 }
+                .distinctUntilChanged()
+                .collect { lastVisibleIndex ->
+                    val shouldLoadNextPage = lastVisibleIndex >= (state.visibleGames.size - 5)
+                    if (shouldLoadNextPage) {
+                        viewModel.executeLoadNextPage()
+                    }
+                }
+        }
     }
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -208,7 +226,7 @@ fun GamesListScreen(
                             }
                             if (state.uiState is GamesUiState.PaginationLoading) {
                                 item(key = "pagination_loading") {
-                                    com.example.gameshub.presentation.games.components.InlineLoadingRow(
+                                    InlineLoadingRow(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(vertical = 12.dp)
@@ -218,6 +236,7 @@ fun GamesListScreen(
                         }
                     } else {
                         LazyVerticalGrid(
+                            state = gridState,
                             columns = GridCells.Fixed(2),
                             contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -232,7 +251,7 @@ fun GamesListScreen(
                             }
                             if (state.uiState is GamesUiState.PaginationLoading) {
                                 item {
-                                    com.example.gameshub.presentation.games.components.InlineLoadingRow(
+                                    InlineLoadingRow(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(vertical = 12.dp)
